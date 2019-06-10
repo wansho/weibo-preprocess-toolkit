@@ -3,3 +3,9 @@ venv/
 test.py
 cleaned_data.csv
 source_data.csv
+build/
+dist/
+weibo_preprocess_toolkit.egg-info/
+weibo_preprocess_toolkit_demo.egg-info/
+__pycache__/
+*.pyc

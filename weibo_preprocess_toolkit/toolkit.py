@@ -5,10 +5,16 @@
 # @File    : toolkit.py
 
 import re
+import os
+import sys
 import csv
+import codecs
+import pkg_resources
 
 import jieba
 from weibo_preprocess_toolkit.lib.langconv import Converter
+
+sys.path.append("../")
 
 
 class WeiboPreprocess:
@@ -41,12 +47,12 @@ class WeiboPreprocess:
         :return:
         """
         if should_before_special_chars:
-            path = "weibo_preprocess_toolkit/dictionary/weibo_stopwords1_regex.csv"
-
+            path = "dictionary/weibo_stopwords1_regex.csv"
         else:
-            path = "weibo_preprocess_toolkit/dictionary/weibo_stopwords2_regex.csv"
-        with open(path, encoding="utf-8") as fr:
-            result = csv.reader(fr, delimiter=',')
+            path = "dictionary/weibo_stopwords2_regex.csv"
+        utf8_reader = codecs.getreader("utf-8")
+        with pkg_resources.resource_stream(__name__, os.path.join(path)) as fr:
+            result = csv.reader(utf8_reader(fr), delimiter=',')
             stop_words_regex = [record[0] for record in result]
         return stop_words_regex
 
@@ -55,9 +61,10 @@ class WeiboPreprocess:
         load special char
         :return:
         """
-        path = "weibo_preprocess_toolkit/dictionary/special_chars.csv"
-        with open(path, encoding="utf-8") as fr:
-            result = csv.reader(fr)
+        path = "dictionary/special_chars.csv"
+        utf8_reader = codecs.getreader("utf-8")
+        with pkg_resources.resource_stream(__name__, os.path.join(path)) as fr:
+            result = csv.reader(utf8_reader(fr))
             special_chars = [record[0] for record in result]
         return special_chars
 
@@ -66,8 +73,8 @@ class WeiboPreprocess:
         init jieba seg tool
         :return:
         """
-        path = "weibo_preprocess_toolkit/dictionary/jieba_expanded_dict.txt"
-        jieba.load_userdict(path)
+        path = "dictionary/jieba_expanded_dict.txt"
+        jieba.load_userdict(pkg_resources.resource_stream(__name__, os.path.join(path)))
 
     def seg(self, weibo):
         """
@@ -119,9 +126,3 @@ class WeiboPreprocess:
         cleaned_weibo = self.clean(weibo)
         cleaned_seged_weibo = self.seg(cleaned_weibo)
         return cleaned_seged_weibo
-
-
-
-
-
-
