@@ -14,6 +14,8 @@ pip install weibo-preprocess-toolkit
 ```Python
 from weibo_preprocess_toolkit import WeiboPreprocess
 
+preprocess = WeiboPreprocess()
+
 test_weibo = "所以我都不喝蒙 #南京·大行宫[地点]#牛，一直不喜欢蒙牛。謝駿毅 赞[122]转发[11] [超话] 收藏09月11日 18:57 "
 
 # clean weibo
