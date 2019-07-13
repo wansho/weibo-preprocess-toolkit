@@ -16,19 +16,33 @@ from weibo_preprocess_toolkit import WeiboPreprocess
 
 preprocess = WeiboPreprocess()
 
-test_weibo = "所以我都不喝蒙 #南京·大行宫[地点]#牛，一直不喜欢蒙牛。謝駿毅 赞[122]转发[11] [超话] 收藏09月11日 18:57 "
+test_weibo = "所以我都不喝蒙牛 #南京·大行宫[地点]#，一直不喜欢蒙牛。謝駿毅 赞[122]转发[11] [超话] 收藏09月11日 18:57 "
 
-# clean weibo
+# traditional2simplified
+print(preprocess.traditional2simplified(test_weibo))
+# 所以我都不喝蒙牛 #南京·大行宫[地点]#，一直不喜欢蒙牛。谢骏毅 赞[122]转发[11] [超话] 收藏09月11日 18:57
+
+# clean weibo with simplified Chinese
 print(preprocess.clean(test_weibo))
-# 所以我都不喝蒙 牛 一直不喜欢蒙牛 谢骏毅
+# 所以我都不喝蒙牛 一直不喜欢蒙牛 谢骏毅
 
-# seg weibo
-print(preprocess.seg(test_weibo))
-# 所以 我 都 不喝 蒙 # 南京 · 大行宫 [ 地点 ] # 牛 ， 一直 不喜欢 蒙牛 。 謝駿毅 赞 [ 122 ] 转发 [ 11 ] [ 超话 ] 收藏 09 月 11 日 18 : 57
+# clean weibo 
+print(preprocess.clean(test_weibo, simplified=False))
+# 所以我都不喝蒙牛 一直不喜欢蒙牛 謝駿毅
 
-# clean and seg weibo
-print(preprocess.clean_and_seg(test_weibo))
-# 所以 我 都 不喝 蒙 牛 一直 不喜欢 蒙牛 谢骏毅
+# seg weibo, keep stop words
+print(preprocess.cut(test_weibo))
+# ['所以', '我', '都', '不喝', '蒙牛', '#', '南京', '·', '大行宫', '[', '地点', ']', '#', '，', '一直', '不喜欢', '蒙牛', '。', '謝駿毅', '赞', '[', '122', ']', '转发', '[', '11', ']', '[', '超话', ']', '收藏', '09', '月', '11', '日', '18', ':', '57', '\xa0']
+
+# seg weibo, don't keep stop words
+print(preprocess.cut(test_weibo, keep_stop_word=False))
+# ['都', '不喝', '蒙牛', '#', '南京', '·', '大行宫', '[', '地点', ']', '#', '，', '不喜欢', '蒙牛', '。', '謝駿毅', '赞', '[', '122', ']', '转发', '[', '11', ']', '[', '超话', ']', '收藏', '09', '月', '11', '日', '18', ':', '57', '\xa0']
+
+# clean and cut weibo, keep_stop_words, simplified Chinese
+print(preprocess.preprocess(test_weibo))
+# 所以 我 都 不喝 蒙牛 一直 不喜欢 蒙牛 谢骏毅
+print(preprocess.preprocess(test_weibo, simplified=False, keep_stop_word=False))
+# 都 不喝 蒙牛 不喜欢 蒙牛 謝駿毅
 ```
 
 
@@ -70,6 +84,8 @@ pip install jieba
 [nstools 中文繁体转简体](https://github.com/skydark/nstools)
 
 [NTUSD 情感词典](https://www.aaai.org/Papers/Symposia/Spring/2006/SS-06-03/SS06-03-020.pdf)
+
+[哈工大停用词表](https://github.com/goto456/stopwords)
 
 ## License
 

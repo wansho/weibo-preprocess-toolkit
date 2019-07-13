@@ -38,6 +38,8 @@ class WeiboPreprocess:
         # load weibo stop word
         stop_words_regex_after_special_chars = self.__load_weibo_stop_word(should_before_special_chars=False)
         self.stop_words_regex2 = "|".join(stop_words_regex_after_special_chars)
+        # load stop words
+        self.stop_words = self.__load_stop_words()
         pass
 
     def __load_weibo_stop_word(self, should_before_special_chars):
@@ -55,6 +57,17 @@ class WeiboPreprocess:
             result = csv.reader(utf8_reader(fr), delimiter=',')
             stop_words_regex = [record[0] for record in result]
         return stop_words_regex
+
+    def __load_stop_words(self):
+        """
+        load stop words
+        :return:
+        """
+        path = "dictionary/stop_words.txt"
+        with pkg_resources.resource_stream(__name__, os.path.join(path)) as fr:
+            stop_words = [word.decode("utf-8").strip() for word in fr if word.strip()]
+        stop_words = set(stop_words)
+        return stop_words
 
     def __load_special_chars(self):
         """
@@ -76,10 +89,11 @@ class WeiboPreprocess:
         path = "dictionary/jieba_expanded_dict.txt"
         jieba.load_userdict(pkg_resources.resource_stream(__name__, os.path.join(path)))
 
-    def seg(self, weibo):
+    def cut(self, weibo, keep_stop_word=True):
         """
         seg weibo into word list
         :param weibo: weibo text
+        :param keep_stop_word: default keep stop word
         :return seged_words: word list
         """
         seged_words = [word for word in jieba.lcut(weibo) if word != " "]
@@ -99,17 +113,29 @@ class WeiboPreprocess:
                 else:
                     index += 1
             reconstructed_seged_words.append(word)
-        seged_words = " ".join(reconstructed_seged_words)
-        return seged_words
+        if not keep_stop_word:
+            reconstructed_seged_words = [word for word in reconstructed_seged_words if word not in self.stop_words]
+        return reconstructed_seged_words
 
-    def clean(self, weibo):
+    def traditional2simplified(self, weibo):
+        """
+        traditional Chinese to simplified Chinese
+        :param weibo:
+        :return:
+        """
+        return self.tradition2simplified_converter.convert(weibo)
+
+
+    def clean(self, weibo, simplified=True):
         """
         weibo clean
         :param weibo: weibo text
+        :param simplified: default simplified Chinese
         :return cleaned_weibo: cleaned weibo
         """
         weibo = weibo.lower().strip()
-        weibo = self.tradition2simplified_converter.convert(weibo)
+        if simplified:
+            weibo = self.traditional2simplified(weibo)
         weibo = re.sub(self.stop_words_regex1, ' ', weibo)
         weibo = re.sub(self.special_chars_regex, ' ', weibo)
         weibo = re.sub(self.stop_words_regex2, ' ', weibo)
@@ -117,12 +143,14 @@ class WeiboPreprocess:
         weibo = re.sub(self.__newline_space_regex, ' ', weibo)
         return weibo
 
-    def clean_and_seg(self, weibo):
+    def preprocess(self, weibo, simplified=True, keep_stop_word=True):
         """
         clean and seg weibo
         :param weibo: weibo text
+        :param simplified: default simplified Chinese
+        :param keep_stop_word: default keep stop word
         :return cleaned_seged_weibo: cleaned and seged weibo
         """
-        cleaned_weibo = self.clean(weibo)
-        cleaned_seged_weibo = self.seg(cleaned_weibo)
+        cleaned_weibo = self.clean(weibo, simplified=simplified)
+        cleaned_seged_weibo = " ".join(self.cut(cleaned_weibo, keep_stop_word=keep_stop_word))
         return cleaned_seged_weibo
